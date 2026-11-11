@@ -157,7 +157,13 @@ private fun Totals(summary: RideSummary, previous: RideRecord?) {
         TotalTile("Output", "${summary.kilojoules}", "kJ", tile, valueColor = Palette.Orange)
         TotalTile(
             "Avg power", "${summary.avgWatts}", "W", tile,
-            note = delta?.let { if (it >= 0) "+$it vs last" else "−${-it} vs last" },
+            note = delta?.let {
+                when {
+                    it > 0 -> "+$it vs last"
+                    it < 0 -> "−${-it} vs last"
+                    else -> "same as last"
+                }
+            },
             noteColor = if ((delta ?: 0) >= 0) Palette.Cyan else Palette.Text3,
         )
         TotalTile("Avg cadence", "${summary.avgRpm}", "rpm", tile)
@@ -190,9 +196,9 @@ private fun TotalTile(
             T(label, ts(18, 600, Palette.Text2), Modifier.weight(1f), maxLines = 1)
             if (note != null) T(note, ts(16, 600, noteColor), maxLines = 1)
         }
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            T(value, ts(62, 700, valueColor, tracking = -2.4f, lineHeight = 0.9f, tabular = true), maxLines = 1)
-            T(unit, ts(20, 400, Palette.Text2), Modifier.padding(bottom = 4.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            T(value, ts(62, 700, valueColor, tracking = -2.4f, lineHeight = 0.9f, tabular = true), Modifier.alignByBaseline(), maxLines = 1)
+            T(unit, ts(20, 400, Palette.Text2), Modifier.alignByBaseline())
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -77,11 +78,13 @@ fun ts(
     letterSpacing = tracking.sp,
     lineHeight = if (lineHeight != null) (size * lineHeight).sp else TextStyle.Default.lineHeight,
     lineHeightStyle = if (lineHeight != null) {
-        LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)
+        // Trim.None so a line height smaller than the font shrinks the box, like CSS does.
+        LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
     } else {
         null
     },
     fontFeatureSettings = if (tabular) "tnum" else null,
+    platformStyle = PlatformTextStyle(includeFontPadding = false),
 )
 
 /**

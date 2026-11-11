@@ -236,13 +236,12 @@ private fun Header(workout: Workout?, progress: RideProgress, sample: BikeSample
 
         Row(
             modifier = Modifier.align(Alignment.Center),
-            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            T(Format.clock(progress.elapsed), ts(60, 700, tracking = -2.2f, lineHeight = 1f, tabular = true))
+            T(Format.clock(progress.elapsed), ts(60, 700, tracking = -2.2f, lineHeight = 1f, tabular = true), Modifier.alignByBaseline())
             val total = progress.total
             if (total != null) {
-                T("/ ${Format.clock(total)}", ts(28, 500, Palette.text(0.6f), tabular = true), Modifier.padding(bottom = 4.dp))
+                T("/ ${Format.clock(total)}", ts(28, 500, Palette.text(0.6f), tabular = true), Modifier.alignByBaseline())
             }
         }
 
@@ -423,9 +422,9 @@ private fun Tile(modifier: Modifier, vertical: Int = 26, content: @Composable ()
 
 @Composable
 private fun BigValue(value: String, unit: String) {
-    Row(Modifier.width(210.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        T(value, ts(116, 800, tracking = -6f, lineHeight = 0.9f, tabular = true), maxLines = 1)
-        T(unit, ts(22, 400, Palette.text(0.7f)), Modifier.padding(bottom = 8.dp))
+    Row(Modifier.width(210.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        T(value, ts(116, 800, tracking = -6f, lineHeight = 0.9f, tabular = true), Modifier.alignByBaseline(), maxLines = 1)
+        T(unit, ts(22, 400, Palette.text(0.7f)), Modifier.alignByBaseline())
     }
 }
 
@@ -616,9 +615,9 @@ private fun TimelineCard(workout: Workout, engine: RideEngine, progress: RidePro
                     T("Finish strong", ts(21, 600))
                 }
             }
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                T(Format.clock(workout.totalSeconds - progress.elapsed), ts(26, 700, tracking = -0.5f, tabular = true))
-                T("to go", ts(19, 400, Palette.text(0.7f)), Modifier.padding(bottom = 2.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                T(Format.clock(workout.totalSeconds - progress.elapsed), ts(26, 700, tracking = -0.5f, tabular = true), Modifier.alignByBaseline())
+                T("to go", ts(19, 400, Palette.text(0.7f)), Modifier.alignByBaseline())
             }
         }
         BoxWithConstraints(
@@ -676,7 +675,8 @@ private fun FreeRideCard(engine: RideEngine, progress: RideProgress, modifier: M
             T("Power", ts(21, 600, Palette.text(0.6f)), Modifier.weight(1f))
             T("${progress.kilojoules} kJ", ts(26, 700, tracking = -0.5f, tabular = true))
         }
-        val trace = engine.seconds.map { it.watts }
+        val raw = engine.seconds.map { it.watts }
+        val trace = raw.indices.map { i -> raw.subList((i - 4).coerceAtLeast(0), i + 1).average().toFloat() }
         Canvas(
             Modifier
                 .fillMaxWidth()
@@ -685,7 +685,7 @@ private fun FreeRideCard(engine: RideEngine, progress: RideProgress, modifier: M
             if (trace.size < 2) return@Canvas
             val window = 1200 // last 20 minutes
             val shown = if (trace.size > window) trace.subList(trace.size - window, trace.size) else trace
-            val max = (shown.maxOrNull() ?: 1).coerceAtLeast(100) * 1.1f
+            val max = (shown.maxOrNull() ?: 1f).coerceAtLeast(100f) * 1.1f
             val path = Path()
             shown.forEachIndexed { i, v ->
                 val x = size.width * i / (shown.size - 1).coerceAtLeast(1)
