@@ -34,6 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -44,13 +47,29 @@ fun T(
     maxLines: Int = Int.MAX_VALUE,
     align: TextAlign? = null,
 ) {
+    var s = if (align != null) style.copy(textAlign = align) else style
+    var m = modifier
+    // Android won't make a line shorter than the font (about 1.21 em for Inter), but the canvas
+    // uses tight CSS line heights like 0.8 for big numbers. Do it here instead: give the text a
+    // box of exactly that height and center the font in it, which is what CSS does.
+    val lh = s.lineHeight
+    if (lh.isSp && s.fontSize.isSp && lh.value < s.fontSize.value * 1.2f) {
+        m = m.lineBox(lh)
+        s = s.copy(lineHeight = TextUnit.Unspecified, lineHeightStyle = null)
+    }
     BasicText(
         text = text,
-        modifier = modifier,
-        style = if (align != null) style.copy(textAlign = align) else style,
+        modifier = m,
+        style = s,
         overflow = TextOverflow.Ellipsis,
         maxLines = maxLines,
     )
+}
+
+private fun Modifier.lineBox(height: TextUnit): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+    val h = height.roundToPx().coerceIn(constraints.minHeight, constraints.maxHeight)
+    layout(placeable.width, h) { placeable.place(0, (h - placeable.height) / 2) }
 }
 
 /** Tap target with a gentle shrink while pressed, no ripple. */

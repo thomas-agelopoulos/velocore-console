@@ -78,7 +78,6 @@ fun ts(
     letterSpacing = tracking.sp,
     lineHeight = if (lineHeight != null) (size * lineHeight).sp else TextStyle.Default.lineHeight,
     lineHeightStyle = if (lineHeight != null) {
-        // Trim.None so a line height smaller than the font shrinks the box, like CSS does.
         LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
     } else {
         null
