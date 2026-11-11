@@ -20,7 +20,9 @@ the bike's own sensors is the next step, once the app is on the console.
 ## Builds
 
 Every push and pull request is built by GitHub Actions (`.github/workflows/build.yml`): unit tests,
-then a signed APK attached to the run as `velocore-console-<run>.apk`. Pushes to `main` also publish
+then a signed APK attached to the run as `velocore-console-<run>.apk`. It also draws every screen at
+1920 × 1080 with Robolectric (`ScreenshotTest`) and attaches the PNGs as `screenshots-<run>`, so the
+app can be checked without the bike. Pushes to `main` also publish
 a release with the APK.
 
 The app is signed with `app/signing/console.jks`, a key made only for this app, so each new build

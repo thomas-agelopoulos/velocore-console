@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -86,6 +87,13 @@ private fun ConsoleApp(bike: BikeSource, store: RideStore) {
     var message by remember { mutableStateOf<String?>(null) }
     var lastMessage by remember { mutableStateOf("") }
     val sample by bike.samples.collectAsState()
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(10_000)
+            now = System.currentTimeMillis()
+        }
+    }
 
     LaunchedEffect(message) {
         message?.let { lastMessage = it }
@@ -114,6 +122,7 @@ private fun ConsoleApp(bike: BikeSource, store: RideStore) {
         Crossfade(targetState = screen, animationSpec = tween(220), label = "screen") { s ->
             when (s) {
                 Screen.Home -> HomeScreen(
+                    now = now,
                     rides = rides,
                     heartConnected = sample.heartRate != null,
                     onFreeRide = { screen = Screen.Ride(null) },

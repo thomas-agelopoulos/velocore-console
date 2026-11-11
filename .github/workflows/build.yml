@@ -27,8 +27,14 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Unit tests
-        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+      - name: Unit tests and screenshots
+        run: ./gradlew recordRoborazziDebug --no-daemon --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: app/build/outputs/roborazzi/*.png
+          retention-days: 30
 
       - name: Build APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace

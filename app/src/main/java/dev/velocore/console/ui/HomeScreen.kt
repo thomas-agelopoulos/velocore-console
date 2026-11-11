@@ -18,11 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,15 +34,16 @@ import dev.velocore.console.data.RideRecord
 import dev.velocore.console.data.RideStore
 import dev.velocore.console.data.Workout
 import dev.velocore.console.data.Workouts
-import kotlinx.coroutines.delay
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZoneId
 
 private const val WEEK_GOAL_MINUTES = 150
 private const val RIDER_NAME = "Thomas"
 
 @Composable
 fun HomeScreen(
+    now: Long,
     rides: List<RideRecord>,
     heartConnected: Boolean,
     onFreeRide: () -> Unit,
@@ -55,15 +51,9 @@ fun HomeScreen(
     onStart: (Workout) -> Unit,
     onNotYet: (String) -> Unit,
 ) {
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(10_000)
-            now = System.currentTimeMillis()
-        }
-    }
-    val today = LocalDate.now()
-    val hour = LocalDateTime.now().hour
+    val at = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault())
+    val today = at.toLocalDate()
+    val hour = at.hour
 
     Column(
         modifier = Modifier

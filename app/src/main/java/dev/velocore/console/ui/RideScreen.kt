@@ -94,6 +94,39 @@ fun RideScreen(
         }
     }
 
+    RideContent(
+        workout = workout,
+        engine = engine,
+        progress = progress,
+        sample = sample,
+        paused = paused,
+        confirmEnd = confirmEnd,
+        simulated = bike is SimulatedBike,
+        onTogglePause = { paused = !paused },
+        onEnd = { confirmEnd = true },
+        onKeepRiding = { confirmEnd = false },
+        onConfirmEnd = {
+            confirmEnd = false
+            finish(engine.summary(System.currentTimeMillis()))
+        },
+    )
+}
+
+/** The riding screen itself, without the clock, so it can be drawn from fixed numbers. */
+@Composable
+fun RideContent(
+    workout: Workout?,
+    engine: RideEngine,
+    progress: RideProgress,
+    sample: BikeSample,
+    paused: Boolean,
+    confirmEnd: Boolean,
+    simulated: Boolean,
+    onTogglePause: () -> Unit,
+    onEnd: () -> Unit,
+    onKeepRiding: () -> Unit,
+    onConfirmEnd: () -> Unit,
+) {
     Box(Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.ride_backdrop),
@@ -113,7 +146,7 @@ fun RideScreen(
                 .padding(start = 64.dp, end = 64.dp, top = 44.dp, bottom = 48.dp),
             verticalArrangement = Arrangement.spacedBy(28.dp),
         ) {
-            Header(workout, progress, sample, simulated = bike is SimulatedBike)
+            Header(workout, progress, sample, simulated)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,11 +180,11 @@ fun RideScreen(
                     label = if (paused) "Resume" else "Pause",
                     color = Color(0x993C3C40),
                     edge = true,
-                    onClick = { paused = !paused },
+                    onClick = onTogglePause,
                 ) {
                     if (paused) Icon(Icons.Play, 44) else Icon(Icons.Pause, 44)
                 }
-                RoundButton(label = "End", color = Palette.Red, edge = false, onClick = { confirmEnd = true }) {
+                RoundButton(label = "End", color = Palette.Red, edge = false, onClick = onEnd) {
                     Icon(Icons.Stop, 40, Palette.Ink)
                 }
             }
@@ -160,11 +193,8 @@ fun RideScreen(
         if (confirmEnd) {
             EndDialog(
                 elapsed = progress.elapsed,
-                onKeepRiding = { confirmEnd = false },
-                onEnd = {
-                    confirmEnd = false
-                    finish(engine.summary(System.currentTimeMillis()))
-                },
+                onKeepRiding = onKeepRiding,
+                onEnd = onConfirmEnd,
             )
         }
     }
